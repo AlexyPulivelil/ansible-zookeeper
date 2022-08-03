@@ -1,0 +1,6 @@
+---
+user: zookeeper
+group: zookeeper
+data_dir: /data/zookeeper
+log_dir: /data/zookeeper/
+version: 3.7.1
