@@ -1,6 +1,6 @@
 ---
   - name: install web components
-    apt: name={{item}} state=present update_cache=yes
+    apt: name={{item}} state=present
     with_items:
         - openjdk-11-jdk
 
@@ -51,11 +51,24 @@
       mode: 0755
       state: directory
 
+
   - name: Config Files Setup
     template:
       src: zoo.cfg.j2
       dest: /opt/zookeeper/{{version}}/conf/zoo.cfg 
       mode: 0755
+
+  - name: Template myid to {{data_dir}}/myid
+    template:
+      src: myid.j2
+      dest: "{{data_dir}}/myid"
+      owner: "{{user}}"
+      group: "{{group}}"
+      mode: 0755
+      
+
+  - name: Overwrite myid file.
+    template: src=myid.j2 dest={{data_dir}}/myid force="{{ zookeeper_force_myid }}"
 
   - name: Apply Page Template
     template:
