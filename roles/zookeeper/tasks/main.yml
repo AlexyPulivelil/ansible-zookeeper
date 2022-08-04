@@ -4,15 +4,6 @@
     with_items:
         - openjdk-11-jdk
 
-  - name: Apply Page Template
-    template:
-      src: zookeeper.service.j2
-      dest: /etc/systemd/system/zookeeper.service
-      mode: 0644
-      notify: 
-        - reload systemd
-        - restart zookeeper
-
 
   - name: Create Group
     group:
@@ -33,7 +24,9 @@
   - name: Create Directory
     file:
       path: /opt/zookeeper/{{version}}
-      state: directory
+      state: directory 
+      mode: 0755 
+      recurse: yes
 
   - name: Extract
     unarchive:
@@ -57,3 +50,38 @@
       group: "{{group}}"
       mode: 0755
       state: directory
+
+  - name: Config Files Setup
+    template:
+      src: zoo.cfg.j2
+      dest: /opt/zookeeper/{{version}}/conf/zoo.cfg 
+      mode: 0755
+
+  - name: Apply Page Template
+    template:
+      src: zookeeper.service.j2
+      dest: /etc/systemd/system/zookeeper.service
+      mode: 0755
+
+  - name: reload systemd
+    become: true
+    command: systemctl daemon-reload
+
+  - name: Change Ownership
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{user}}"
+      group: "{{group}}"
+      mode: 0755
+      recurse: true
+    with_items:
+        - /opt/zookeeper/
+        - /data/zookeeper/
+        - /log/zookeeper/
+
+
+  - name: Start Zookeeper
+    ansible.builtin.systemd:
+      name: zookeeper.service
+      state: started

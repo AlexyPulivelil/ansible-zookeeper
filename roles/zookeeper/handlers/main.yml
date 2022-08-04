@@ -1,8 +1,1 @@
 ---
-- name: reload systemd
-  command: systemctl daemon-reload
-
-- name: restart zookeeper
-  systemd:
-    name: zookeeper.service
-    state: started
